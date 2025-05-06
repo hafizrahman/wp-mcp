@@ -1,5 +1,7 @@
 # wp-mcp
 
+[![smithery badge](https://smithery.ai/badge/@hafizrahman/wp-mcp)](https://smithery.ai/server/@hafizrahman/wp-mcp)
+
 `wp-mcp` is a weather and WordPress integration tool built using the [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/sdk). This project provides two primary features:
 
 1. **Weather Alerts & Forecasts** using the [National Weather Service API](https://www.weather.gov/documentation/services-web-api).
@@ -24,6 +26,14 @@ To demo Claude using both tools at once, you can try some clever prompt like:
 - "Check all the categories in hafiz.blog, find one that's likely written in Indonesian, and then make me an poem in Indonesian language based on a post from that category."
 
 ## Installation
+
+### Installing via Smithery
+
+To install Weather and WordPress Integration Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@hafizrahman/wp-mcp):
+
+```bash
+npx -y @smithery/cli install @hafizrahman/wp-mcp --client claude
+```
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/en/) (v14.x or above)
