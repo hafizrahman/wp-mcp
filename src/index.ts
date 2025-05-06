@@ -206,6 +206,85 @@ server.tool(
     }
 );
 
+interface WPCategory {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+server.tool(
+    "get-categories",
+    "Get all categories available on hafiz.blog (WordPress.com)",
+    {},
+    async () => {
+        const categoriesUrl = `${WP_COM_API_BASE}/categories?per_page=50&_fields=id,name,slug`;
+        const categories = await fetchJson<WPCategory[]>(categoriesUrl);
+
+        if (!categories || categories.length === 0) {
+            return {
+                content: [{ type: "text", text: "No categories found" }],
+            };
+        }
+
+        const formattedCategories = categories.map((category) =>
+            `Category: ${category.name} (Slug: ${category.slug})`
+        );
+
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `Categories on hafiz.blog:\n\n${formattedCategories.join("\n")}`,
+                },
+            ],
+        };
+    }
+);
+
+server.tool(
+    "get-posts-by-category",
+    "Get posts from a specific category on hafiz.blog (WordPress.com)",
+    {
+        categorySlug: z.string().describe("Slug of the category (e.g., 'technology', 'life')"),
+    },
+    async ({ categorySlug }) => {
+        // Get category ID using the category slug
+        const categoriesUrl = `${WP_COM_API_BASE}/categories?slug=${categorySlug}`;
+        const categories = await fetchJson<WPCategory[]>(categoriesUrl);
+
+        if (!categories || categories.length === 0) {
+            return {
+                content: [{ type: "text", text: `No category found with slug '${categorySlug}'` }],
+            };
+        }
+
+        // Fetch posts based on the category ID
+        const categoryId = categories[0].id;
+        const postsUrl = `${WP_COM_API_BASE}/posts?categories=${categoryId}&per_page=10&_fields=id,title,link,date,excerpt`;
+        const posts = await fetchJson<WPPost[]>(postsUrl);
+
+        if (!posts || posts.length === 0) {
+            return {
+                content: [{ type: "text", text: `No posts found in category '${categorySlug}'` }],
+            };
+        }
+
+        const formattedPosts = posts.map((post) =>
+            [
+                `Title: ${post.title.rendered}`,
+                `Date: ${new Date(post.date).toLocaleString()}`,
+                `Link: ${post.link}`,
+                `Excerpt: ${stripHTML(post.excerpt.rendered).slice(0, 200)}...`,
+                "---",
+            ].join("\n")
+        );
+
+        return {
+            content: [{ type: "text", text: `Posts in category '${categorySlug}':\n\n${formattedPosts.join("\n")}` }],
+        };
+    }
+);
+
 // --- Start server ---
 async function main() {
     const transport = new StdioServerTransport();
